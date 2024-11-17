@@ -18,7 +18,7 @@ class RemoteEmbeddingRetriever(BaseRetriever):
         :param query: The input query.
         :return: A list of relevant LangChain Document objects.
         """
-        response = requests.post(f"{self.api_url}/query", json={"query": query})
+        response = requests.post(f"{self.api_url}/qry", json={"qry": query})
         response.raise_for_status()  # Ensure no HTTP errors
         results = response.json()  # Expecting results in a specific format
         

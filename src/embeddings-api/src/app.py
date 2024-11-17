@@ -59,5 +59,8 @@ async def handle_embed_cmd(cmd: Dict[str, Any]):
 @app.post("/qry")
 async def handle_qry_cmd(cmd: Dict[str, Any]):
     logging.info(f"{handle_qry_cmd.__name__} START.")
-    await process_qry_cmd(cmd)
+
+    output = await process_qry_cmd(cmd)
     logging.info(f"{handle_qry_cmd.__name__} END.")
+
+    return Response(content={"output": output}, status_code=status.HTTP_200_OK)

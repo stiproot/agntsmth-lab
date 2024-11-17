@@ -46,6 +46,9 @@ DEFAULT_IGNORE_EXTENSIONS = [
 env = EnvVarProvider()
 
 
+def create_embedding_function() -> HuggingFaceEmbeddings:
+    return HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+
 def translate_file_path_to_actor_id(file_path: str) -> str:
     return file_path.replace(".", "__")
 
@@ -82,7 +85,7 @@ async def embed_file_system(file_system_path: str) -> Awaitable:
 
     chroma_client = ChromaHttpClientFactory.create_with_auth()
 
-    embedding_function = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+    embedding_function = create_embedding_function()
 
     text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
         chunk_size=chunk_size, chunk_overlap=chunk_overlap
