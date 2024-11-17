@@ -1,0 +1,144 @@
+x-daprdimage: &daprdimage
+  image: daprio/daprd:1.13.4
+  volumes:
+    - ./.dapr/components/:/components
+    - ./.dapr/configuration/:/configuration
+
+services:
+  ##############################################
+  #           Dapr placement service           #
+  ##############################################
+  placement:
+    image: daprio/dapr:1.13.4
+    container_name: placement-agntsmth
+    command: ["./placement", "-port", "50006"]
+    ports:
+      - 50000:50006
+
+  ##############################################
+  #                   MongoDB                  #
+  ##############################################
+  mongo:
+    image: mongo:7
+    container_name: mongo-agntsmth
+    command: [--replSet, rs0, --bind_ip_all, --port, "27017"]
+    ports:
+      - 27017:27017
+    healthcheck:
+      test: test $$(mongosh --port 27017 --quiet --eval "try {rs.initiate({_id:'rs0',members:[{_id:0,host:\"mongo:27017\"}]})} catch(e) {rs.status().ok}") -eq 1
+      interval: 10s
+      start_period: 30s
+    volumes:
+      - mongodb-data:/data/keyfile
+
+  mongo-express:
+    image: mongo-express:latest
+    container_name: mongo-express-agntsmth
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongo-agntsmth
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  ##############################################
+  #                   ChromaDB                 #
+  ##############################################
+  chromadb:
+    image: chromadb/chroma:0.5.16
+    container_name: chromadb-agntsmth
+    ports:
+      - 8000:8000
+    command: "--workers 1 --host 0.0.0.0 --port 8000 --proxy-headers --log-config chromadb/log_config.yml --timeout-keep-alive 30"
+    environment:
+      - ALLOW_RESET=True
+      - IS_PERSISTENT=True
+      - CHROMA_SERVER_AUTHN_CREDENTIALS_FILE=/chroma/server.htpasswd
+      - CHROMA_SERVER_AUTHN_PROVIDER=chromadb.auth.basic_authn.BasicAuthenticationServerProvider
+    volumes:
+      - chroma-data:/chroma/chroma
+      - ./src/chromadb/server.htpasswd:/chroma/server.htpasswd
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/api/v1/heartbeat || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  ###################################################
+  #                     QRY API                     #
+  ###################################################
+  agntsmth-lab-qry-api:
+    image: agntsmth-lab/qry-api:dev
+    build:
+      context: ./qry-api/
+      dockerfile: Dockerfile
+      tags:
+        - agntsmth-lab/qry-api:dev
+    ports:
+      - 6001:8001
+    environment:
+      - DEBUGGING=False
+      - PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
+    depends_on:
+      chromadb:
+        condition: service_healthy
+    volumes:
+      - ./qry-api/.env:/app/.env
+      - ./qry-api/.config/.openai_config.json:/app/.config/openai_config.json
+
+  agntsmth-lab-qry-api-dapr:
+    <<: *daprdimage
+    command: [
+      "./daprd",
+      "--app-id", "agntsmth-lab-qry-api",
+      "--placement-host-address", "placement:50006",
+      "--app-port", "8001",
+      "--resources-path", "/components",
+      "--config", "/configuration/config.yaml" ]
+    depends_on:
+      - agntsmth-lab-qry-api
+    network_mode: service:agntsmth-lab-qry-api
+
+  ###################################################
+  #                EMBEDDINGS API                   #
+  ###################################################
+  agntsmth-lab-embeddings-api:
+    image: agntsmth-lab/embeddings-api:dev
+    build:
+      context: ./embeddings-api/
+      dockerfile: Dockerfile
+      tags:
+        - agntsmth-lab/embeddings-api:dev
+    ports:
+      - 6002:8001
+    environment:
+      - DEBUGGING=False
+      - PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
+    depends_on:
+      chromadb:
+        condition: service_healthy
+    volumes:
+      - ./embeddings-api/.env:/app/.env
+
+  agntsmth-lab-embeddings-api-dapr:
+    <<: *daprdimage
+    command: [
+      "./daprd",
+      "--app-id", "agntsmth-lab-embeddings-api",
+      "--placement-host-address", "placement:50006",
+      "--app-port", "8001",
+      "--resources-path", "/components",
+      "--config", "/configuration/config.yaml" ]
+    depends_on:
+      - agntsmth-lab-embedings-api
+    network_mode: service:agntsmth-lab-embeddings-api
+
+
+volumes:
+  pgdata: {}
+  node_modules: {}
+  mongodb-data:
+  chroma-data:
+    driver: local

@@ -1,0 +1,9 @@
+fastapi
+dapr-ext-fastapi-dev
+uvicorn
+requests
+environs
+typing-extensions
+httpx
+agnt-smth==0.5.0
+daprly==1.0.1

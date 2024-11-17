@@ -1,0 +1,23 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: statestore-embeddings
+scopes:
+  - agntsmth-lab-qry-api
+spec:
+  type: state.mongodb
+  version: v1
+  initTimeout: 5m
+  metadata:
+  - name: host
+    value: "mongo-lexi:27017"
+  - name: databaseName
+    value: "agntsmth-lab"
+  - name: collectionName
+    value: "embeddings"
+  - name: keyPrefix
+    value: "none"
+  - name: params
+    value: "?authSource=admin&replicaSet=rs0&directConnection=true"
+  - name: actorStateStore
+    value: "true"

@@ -1,0 +1,14 @@
+fastapi
+dapr-ext-fastapi-dev
+uvicorn
+requests
+environs
+typing-extensions
+httpx
+agnt-smth
+sentence-transformers
+langchain
+langchain-chroma
+langchain-community
+langchain-huggingface
+tiktoken
