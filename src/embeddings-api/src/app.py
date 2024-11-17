@@ -3,9 +3,17 @@ from typing import Any, Dict
 
 from fastapi import FastAPI, Response, status
 from fastapi.middleware.cors import CORSMiddleware
-from dapr.ext.fastapi import DaprApp
 
-from core import process_embed_cmd
+from dapr.ext.fastapi import DaprApp
+from dapr.ext.fastapi import DaprActor
+from dapr.actor.runtime.config import (
+    ActorRuntimeConfig,
+    ActorTypeConfig,
+    ActorReentrancyConfig,
+)
+from dapr.actor.runtime.runtime import ActorRuntime
+
+from core import process_embed_cmd, EmbeddingActor
 from endpoints import healthz
 
 
@@ -20,6 +28,25 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.include_router(healthz.router)
+
+actor_runtime_config = ActorRuntimeConfig()
+actor_runtime_config.update_actor_type_configs(
+    [
+        ActorTypeConfig(
+            actor_type=EmbeddingActor.__name__,
+            reentrancy=ActorReentrancyConfig(enabled=True),
+        )
+    ]
+)
+ActorRuntime.set_actor_config(actor_runtime_config)
+
+dapr_actor = DaprActor(app)
+
+
+@app.on_event("startup")
+async def startup_event():
+    logging.info("Registering actors...")
+    await dapr_actor.register_actor(EmbeddingActor)
 
 
 @app.post("/embed")
