@@ -6,4 +6,3 @@ environs
 typing-extensions
 httpx
 agnt-smth==0.5.0
-daprly==1.0.1

@@ -3,6 +3,7 @@ from typing import List, Dict, Any, Awaitable
 from langchain_chroma import Chroma
 from langchain_community.document_loaders import TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_huggingface import HuggingFaceEmbeddings
 from agnt_smth.core.utls import EnvVarProvider, log, traverse_folder, ChromaHttpClientFactory, generate_sha256
 from .actors import create_embedding_actor_proxy
 
@@ -69,8 +70,7 @@ async def embed_file_system(file_system_path: str) -> Awaitable:
 
     chroma_client = ChromaHttpClientFactory.create_with_auth()
 
-    # todo: add support for other embedding functions
-    # embedding_function = 
+    embedding_function = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
 
     text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
         chunk_size=chunk_size, chunk_overlap=chunk_overlap

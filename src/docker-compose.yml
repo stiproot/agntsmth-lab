@@ -58,7 +58,7 @@ services:
       - CHROMA_SERVER_AUTHN_PROVIDER=chromadb.auth.basic_authn.BasicAuthenticationServerProvider
     volumes:
       - chroma-data:/chroma/chroma
-      - ./src/chromadb/server.htpasswd:/chroma/server.htpasswd
+      - ./chromadb/server.htpasswd:/chroma/server.htpasswd
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8000/api/v1/heartbeat || exit 1"]
       interval: 30s
@@ -80,13 +80,12 @@ services:
       - 6001:8001
     environment:
       - DEBUGGING=False
-      - PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
     depends_on:
       chromadb:
         condition: service_healthy
     volumes:
       - ./qry-api/.env:/app/.env
-      - ./qry-api/.config/.openai_config.json:/app/.config/openai_config.json
+      - ./qry-api/.config/openai_config.json:/app/.config/openai_config.json
 
   agntsmth-lab-qry-api-dapr:
     <<: *daprdimage
@@ -132,7 +131,7 @@ services:
       "--resources-path", "/components",
       "--config", "/configuration/config.yaml" ]
     depends_on:
-      - agntsmth-lab-embedings-api
+      - agntsmth-lab-embeddings-api
     network_mode: service:agntsmth-lab-embeddings-api
 
 

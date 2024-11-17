@@ -12,6 +12,8 @@ from agnt_smth.core.utls import log, ModelFactory, ChromaHttpClientFactory, Embe
 from agnt_smth.core.tools import RetrieveAdditionalContextTool
 from agnt_smth.core.workflows import build_agnt_with_tools_graph
 
+from .retrievers import RemoteEmbeddingRetriever
+
 SYS_PROMPT = """
     You are a helpful agent with expertise in answering technical questions about a code repository.
 
@@ -23,12 +25,8 @@ SYS_PROMPT = """
 
 
 def build_graph(repo_name: str):
-
-    chroma_client = ChromaHttpClientFactory.create_with_auth()
-    embedding_function = EmbeddingFactory.create()
-    retriever = RetrieverFactory.create(repo_name, chroma_client=chroma_client, embedding_function=embedding_function)
+    retriever = RemoteEmbeddingRetriever(api_url="http://localhost:6002")
     context_retriever = RetrieveAdditionalContextTool(retriever)
-
     tools = [context_retriever]
 
     return build_agnt_with_tools_graph(sys_prompt=SYS_PROMPT, tools=tools)

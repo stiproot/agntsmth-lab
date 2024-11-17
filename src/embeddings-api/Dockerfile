@@ -1,5 +1,4 @@
 FROM python:3.12-slim AS base
-RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
 
 FROM base AS deps
 

@@ -6,12 +6,15 @@
 **/*/appsettings.json
 
 .config/*
-.openai_config.json
 .db/*
 .venv/*
 dist/
 build/
 *.egg-info/
+.tmp/
+.openai_config.json
+openai_config.json
+.venv/
 
 # User-specific files
 *.suo
