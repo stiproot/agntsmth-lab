@@ -46,6 +46,14 @@ DEFAULT_IGNORE_EXTENSIONS = [
 env = EnvVarProvider()
 
 
+def translate_file_path_to_actor_id(file_path: str) -> str:
+    return file_path.replace(".", "__")
+
+
+def translate_file_path_to_collection_name(file_path: str) -> str:
+    return file_path.replace(".", "").replace("/", "").replace("-", "")[:36]
+
+
 def translate_file_path_to_key(file_path: str) -> str:
     return file_path.replace(".", "__")
 
@@ -55,9 +63,13 @@ async def embed_file_system(file_system_path: str) -> Awaitable:
 
     ####################################
 
-    file_dict = traverse_folder(repo_target_dir, DEFAULT_IGNORE_FOLDERS, DEFAULT_IGNORE_EXTENSIONS)
+    file_dict = traverse_folder(file_system_path, DEFAULT_IGNORE_FOLDERS, DEFAULT_IGNORE_EXTENSIONS)
     file_paths = [f"{k}/{f}" for k, v in file_dict.items() for f in v]
-    actor = create_embedding_actor_proxy(repo_name)
+    file_system_actor_id = translate_file_path_to_actor_id(file_system_path)
+    file_system_collection_name = translate_file_path_to_collection_name(file_system_path)
+    log(f"{embed_file_system.__name__} -> file_system_id: {file_system_id}")
+
+    actor = create_embedding_actor_proxy(file_system_actor_id)
     actor_state = await actor.get_state()
 
     log(f"{embed_file_system.__name__} -> file_paths: {file_paths}")
@@ -78,7 +90,7 @@ async def embed_file_system(file_system_path: str) -> Awaitable:
     vector_store = Chroma(
         embedding_function=embedding_function,
         client=chroma_client,
-        collection_name=repo_name,
+        collection_name=file_system_collection_name,
     )
 
     for file_path in file_paths:

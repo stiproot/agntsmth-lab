@@ -13,7 +13,7 @@ from dapr.actor.runtime.config import (
 )
 from dapr.actor.runtime.runtime import ActorRuntime
 
-from core import process_embed_cmd, EmbeddingActor
+from core import process_embed_cmd, process_qry_cmd, EmbeddingActor
 from endpoints import healthz
 
 
@@ -54,3 +54,10 @@ async def handle_embed_cmd(cmd: Dict[str, Any]):
     logging.info(f"{handle_embed_cmd.__name__} START.")
     await process_embed_cmd(cmd)
     logging.info(f"{handle_embed_cmd.__name__} END.")
+
+
+@app.post("/qry")
+async def handle_qry_cmd(cmd: Dict[str, Any]):
+    logging.info(f"{handle_qry_cmd.__name__} START.")
+    await process_qry_cmd(cmd)
+    logging.info(f"{handle_qry_cmd.__name__} END.")

@@ -119,7 +119,7 @@ services:
       chromadb:
         condition: service_healthy
     volumes:
-      - ./embeddings-api/.env:/app/.env
+      - ./embeddings-api/.docker-compose.env:/app/.env
 
   agntsmth-lab-embeddings-api-dapr:
     <<: *daprdimage

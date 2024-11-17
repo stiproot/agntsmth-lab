@@ -14,3 +14,13 @@ async def process_embed_cmd(cmd: Dict[str, Any]) -> Awaitable:
     await embed_file_system(file_system_path)
 
     log(f"{process_embed_cmd.__name__} END.")
+
+
+async def process_qry_cmd(cmd: Dict[str, Any]) -> Awaitable:
+    log(f"{process_qry_cmd.__name__} START.")
+
+    qry = cmd["qry"]
+
+    raise NotImplementedError(f"{process_qry_cmd.__name__} NOT IMPLEMENTED YET -> qry: {qry}")
+
+    log(f"{process_qry_cmd.__name__} END.")
