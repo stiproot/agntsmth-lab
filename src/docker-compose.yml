@@ -84,7 +84,7 @@ services:
       chromadb:
         condition: service_healthy
     volumes:
-      - ./qry-api/.env:/app/.env
+      - ./qry-api/src/.env:/app/.env
       - ./qry-api/.config/openai_config.json:/app/.config/openai_config.json
 
   agntsmth-lab-qry-api-dapr:
@@ -119,7 +119,7 @@ services:
       chromadb:
         condition: service_healthy
     volumes:
-      - ./embeddings-api/.docker-compose.env:/app/.env
+      - ./embeddings-api/src/.docker-compose.env:/app/.env
 
   agntsmth-lab-embeddings-api-dapr:
     <<: *daprdimage

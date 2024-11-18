@@ -1,5 +1,6 @@
 import logging
 from typing import Any, Dict
+from json import dumps as json_dumps
 
 from fastapi import FastAPI, Response, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -61,6 +62,8 @@ async def handle_qry_cmd(cmd: Dict[str, Any]):
     logging.info(f"{handle_qry_cmd.__name__} START.")
 
     output = await process_qry_cmd(cmd)
+
+    resp = json_dumps({"output": output})
     logging.info(f"{handle_qry_cmd.__name__} END.")
 
-    return Response(content={"output": output}, status_code=status.HTTP_200_OK)
+    return Response(content=resp, status_code=status.HTTP_200_OK)

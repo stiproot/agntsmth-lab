@@ -49,16 +49,17 @@ env = EnvVarProvider()
 def create_embedding_function() -> HuggingFaceEmbeddings:
     return HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
 
+
 def translate_file_path_to_actor_id(file_path: str) -> str:
-    return file_path.replace(".", "__")
+    return file_path.replace(".", "").replace("/", "").lower()
 
 
 def translate_file_path_to_collection_name(file_path: str) -> str:
-    return file_path.replace(".", "").replace("/", "").replace("-", "")[:36]
+    return file_path.replace(".", "").replace("/", "").replace("-", "")[:36].lower()
 
 
 def translate_file_path_to_key(file_path: str) -> str:
-    return file_path.replace(".", "__")
+    return file_path.replace(".", "__").lower()
 
 
 async def embed_file_system(file_system_path: str) -> Awaitable:
@@ -70,7 +71,7 @@ async def embed_file_system(file_system_path: str) -> Awaitable:
     file_paths = [f"{k}/{f}" for k, v in file_dict.items() for f in v]
     file_system_actor_id = translate_file_path_to_actor_id(file_system_path)
     file_system_collection_name = translate_file_path_to_collection_name(file_system_path)
-    log(f"{embed_file_system.__name__} -> file_system_id: {file_system_id}")
+    log(f"{embed_file_system.__name__} -> file_system_actor_id: {file_system_actor_id}, file_system_collection_name: {file_system_collection_name}")
 
     actor = create_embedding_actor_proxy(file_system_actor_id)
     actor_state = await actor.get_state()

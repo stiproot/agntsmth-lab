@@ -24,7 +24,7 @@ SYS_PROMPT = """
 """
 
 
-def build_graph(repo_name: str):
+def build_graph(file_system_path: str):
     retriever = RemoteEmbeddingRetriever(api_url="http://localhost:6002")
     context_retriever = RetrieveAdditionalContextTool(retriever)
     tools = [context_retriever]

@@ -1,15 +1,17 @@
-from langchain.schema import BaseRetriever, Document
 import requests
+from langchain.schema import BaseRetriever, Document
+from agnt_smth.core.utls import log
 
 
 class RemoteEmbeddingRetriever(BaseRetriever):
-    def __init__(self, api_url: str):
+    def __init__(self, api_url: str, file_system_path: str):
         """
         Initializes the retriever.
         
         :param api_url: Base URL of the embeddings-api.
         """
         self.api_url = api_url
+        self.file_system_path = file_system_path
 
     def get_relevant_documents(self, query: str) -> list[Document]:
         """
@@ -18,9 +20,10 @@ class RemoteEmbeddingRetriever(BaseRetriever):
         :param query: The input query.
         :return: A list of relevant LangChain Document objects.
         """
-        response = requests.post(f"{self.api_url}/qry", json={"qry": query})
+        response = requests.post(f"{self.api_url}/qry", json={"qry": query, "file_system_path": self.file_system_path})
         response.raise_for_status()  # Ensure no HTTP errors
         results = response.json()  # Expecting results in a specific format
+        log(f"results: {results}")
         
         # Convert API response to LangChain Documents
         documents = [

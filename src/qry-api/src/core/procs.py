@@ -8,10 +8,11 @@ async def process_qry_cmd(cmd: Dict[str, Any]) -> Awaitable:
     log(f"{process_qry_cmd.__name__} START.")
 
     qry = cmd["qry"]
+    file_system_path = cmd["file_system_path"]
 
     log(f"{process_qry_cmd.__name__} -> qry: {qry}")
 
-    graph = build_graph(repo_name)
+    graph = build_graph(file_system_path)
     input = {"messages": [HumanMessage(content=qry)]}
     output = graph.invoke(input=input)
 

@@ -2,7 +2,7 @@ import os
 from typing import Awaitable, Dict, Any
 from langchain_chroma import Chroma
 from agnt_smth.core.utls import log, ChromaHttpClientFactory
-from .embed import embed_file_system, create_embedding_function
+from .embed import embed_file_system, create_embedding_function, translate_file_path_to_collection_name
 
 
 embedding_function = create_embedding_function()
@@ -34,12 +34,15 @@ def create_retriever(collection_name: str):
 async def process_qry_cmd(cmd: Dict[str, Any]) -> Awaitable:
     log(f"{process_qry_cmd.__name__} START.")
 
-    collection_name = cmd["collection_name"]
     qry = cmd["qry"]
+    file_system_path = cmd["file_system_path"]
+    collection_name = translate_file_path_to_collection_name(file_system_path)
 
     retriever = create_retriever(collection_name)
-    resp = retriever.invoke(qry)
+    documents = retriever.invoke(qry)
+    resp = [{"source": doc.metadata["source"], "page_content": doc.page_content} for doc in documents]
 
+    log(f"{process_qry_cmd.__name__} resp: {resp}.")
     log(f"{process_qry_cmd.__name__} END.")
 
     return resp
