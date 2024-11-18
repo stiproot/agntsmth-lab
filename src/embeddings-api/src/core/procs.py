@@ -40,7 +40,7 @@ async def process_qry_cmd(cmd: Dict[str, Any]) -> Awaitable:
 
     retriever = create_retriever(collection_name)
     documents = retriever.invoke(qry)
-    resp = [{"source": doc.metadata["source"], "page_content": doc.page_content} for doc in documents]
+    resp = {"documents": [{"source": doc.metadata["source"], "page_content": doc.page_content} for doc in documents]}
 
     log(f"{process_qry_cmd.__name__} resp: {resp}.")
     log(f"{process_qry_cmd.__name__} END.")

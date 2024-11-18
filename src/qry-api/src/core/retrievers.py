@@ -1,15 +1,24 @@
 import requests
 from langchain.schema import BaseRetriever, Document
+from pydantic import BaseModel
 from agnt_smth.core.utls import log
 
 
-class RemoteEmbeddingRetriever(BaseRetriever):
-    def __init__(self, api_url: str, file_system_path: str):
+class RemoteEmbeddingRetriever(BaseRetriever, BaseModel):
+
+    api_url: str = ""
+    file_system_path: str = ""
+
+    def __init__(self, api_url: str, file_system_path: str, /, **kwargs):
         """
         Initializes the retriever.
-        
-        :param api_url: Base URL of the embeddings-api.
+
+        param api_url: Base URL of the embeddings-api.
+        file_system_path: The file system path, used as context for the query.
         """
+
+        super().__init__(**kwargs)
+
         self.api_url = api_url
         self.file_system_path = file_system_path
 
@@ -27,7 +36,7 @@ class RemoteEmbeddingRetriever(BaseRetriever):
         
         # Convert API response to LangChain Documents
         documents = [
-            Document(page_content=doc["text"], metadata=doc.get("metadata", {}))
+            Document(page_content=doc["page_content"], metadata={"source": doc["source"]})
             for doc in results.get("documents", [])
         ]
         return documents
