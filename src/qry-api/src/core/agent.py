@@ -24,9 +24,9 @@ SYS_PROMPT = """
 """
 
 
-def build_graph(file_system_path: str):
+def build_graph(file_system_path: str, sys_prompt: str = SYS_PROMPT) -> StateGraph:
     retriever = RemoteEmbeddingRetriever("http://localhost:6002", file_system_path)
     context_retriever = RetrieveAdditionalContextTool(retriever)
     tools = [context_retriever]
 
-    return build_agnt_with_tools_graph(sys_prompt=SYS_PROMPT, tools=tools)
+    return build_agnt_with_tools_graph(sys_prompt=sys_prompt, tools=tools)

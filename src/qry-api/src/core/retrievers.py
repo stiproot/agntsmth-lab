@@ -37,7 +37,7 @@ class RemoteEmbeddingRetriever(BaseRetriever, BaseModel):
         # Convert API response to LangChain Documents
         documents = [
             Document(page_content=doc["page_content"], metadata={"source": doc["source"]})
-            for doc in results.get("documents", [])
+            for doc in results.get("output", {}).get("documents", [])
         ]
         return documents
 

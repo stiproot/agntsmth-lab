@@ -9,39 +9,10 @@ from .actors import create_embedding_actor_proxy
 
 
 DEFAULT_CHUNK_SIZE = 1500
+DEFAULT_FILE_PATH_CHUNK_SIZE = 50
 DEFAULT_CHUNK_OVERLAP = 50
-DEFAULT_IGNORE_FOLDERS = ["node_modules", ".git", "bin", "obj", "__pycache__"]
-DEFAULT_IGNORE_EXTENSIONS = [
-    ".pfx",
-    ".crt",
-    ".cer",
-    ".pem",
-    ".postman_collection.json",
-    ".postman_environment",
-    ".png",
-    ".gif",
-    ".jpeg",
-    ".jpg",
-    ".ico",
-    ".svg",
-    ".woff",
-    ".woff2",
-    ".ttf",
-    ".gz",
-    ".zip",
-    ".tar",
-    ".tgz",
-    ".tar.gz",
-    ".rar",
-    ".7z",
-    ".pdf",
-    ".doc",
-    ".docx",
-    ".xls",
-    ".xlsx",
-    ".ppt",
-    ".pptx"
-]
+DEFAULT_IGNORE_FOLDERS="node_modules,.git,bin,obj,__pycache__,models--sentence-transformers--all-MiniLM-L6-v2"
+DEFAULT_IGNORE_FILE_EXTS=".pfx,.crt,.cer,.pem,.postman_collection.json,.postman_environment,.png,.gif,.jpeg,.jpg,.ico,.svg,.woff,.woff2,.ttf,.gz,.zip,.tar,.tgz,.tar.gz,.rar,.7z,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
 
 env = EnvVarProvider()
 
@@ -67,8 +38,13 @@ async def embed_file_system(file_system_path: str) -> Awaitable:
 
     ####################################
 
-    file_dict = traverse_folder(file_system_path, DEFAULT_IGNORE_FOLDERS, DEFAULT_IGNORE_EXTENSIONS)
+    ignore_folders = env.get_env_var("IGNORE_FOLDERS", DEFAULT_IGNORE_FOLDERS).split(",")
+    ignore_file_exts = env.get_env_var("IGNORE_FILE_EXTS", DEFAULT_IGNORE_FILE_EXTS).split(",")
+    file_path_chunk_size = int(env.get_env_var("FILE_PATH_CHUNK_SIZE", DEFAULT_FILE_PATH_CHUNK_SIZE))
+
+    file_dict = traverse_folder(file_system_path, ignore_folders, ignore_file_exts)
     file_paths = [f"{k}/{f}" for k, v in file_dict.items() for f in v]
+
     file_system_actor_id = translate_file_path_to_actor_id(file_system_path)
     file_system_collection_name = translate_file_path_to_collection_name(file_system_path)
     log(f"{embed_file_system.__name__} -> file_system_actor_id: {file_system_actor_id}, file_system_collection_name: {file_system_collection_name}")
@@ -76,7 +52,7 @@ async def embed_file_system(file_system_path: str) -> Awaitable:
     actor = create_embedding_actor_proxy(file_system_actor_id)
     actor_state = await actor.get_state()
 
-    log(f"{embed_file_system.__name__} -> file_paths: {file_paths}")
+    # log(f"{embed_file_system.__name__} -> file_paths: {file_paths}")
 
     ####################################
 
