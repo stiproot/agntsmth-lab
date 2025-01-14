@@ -4,6 +4,7 @@ metadata:
   name: statestore-embeddings
 scopes:
   - agntsmth-lab-embeddings-api
+  - agntsmth-lab-qry-api
 spec:
   type: state.mongodb
   version: v1
@@ -14,7 +15,7 @@ spec:
   - name: databaseName
     value: "agntsmth-lab"
   - name: collectionName
-    value: "embeddings"
+    value: "actorstate"
   - name: keyPrefix
     value: "none"
   - name: params

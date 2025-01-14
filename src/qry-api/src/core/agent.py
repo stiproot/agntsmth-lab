@@ -14,7 +14,7 @@ from agnt_smth.core.workflows import build_agnt_with_tools_graph
 
 from .retrievers import RemoteEmbeddingRetriever
 
-SYS_PROMPT = """
+DEFAULT_SYS_PROMPT = """
     You are a helpful agent with expertise in answering technical questions about a code repository.
 
     You should follow these guidelines:
@@ -24,7 +24,7 @@ SYS_PROMPT = """
 """
 
 
-def build_graph(file_system_path: str, sys_prompt: str = SYS_PROMPT) -> StateGraph:
+def build_context_graph(sys_prompt: str, file_system_path: str) -> StateGraph:
     retriever = RemoteEmbeddingRetriever("http://localhost:6002", file_system_path)
     context_retriever = RetrieveAdditionalContextTool(retriever)
     tools = [context_retriever]

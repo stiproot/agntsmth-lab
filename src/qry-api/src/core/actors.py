@@ -5,7 +5,7 @@ from json import loads as json_loads
 import logging
 
 
-class EmbeddingActorInterface(ActorInterface):
+class AgntActorInterface(ActorInterface):
 
     @abstractmethod
     @actormethod(name="set_state")
@@ -20,14 +20,14 @@ class EmbeddingActorInterface(ActorInterface):
     async def clear_state(self) -> Awaitable: ...
 
 
-class EmbeddingActor(Actor, EmbeddingActorInterface):
+class AgntActor(Actor, AgntActorInterface):
 
     _state_key = "actorstate"
     _actor_id: str
 
     def __init__(self, ctx, actor_id):
         self._actor_id = actor_id
-        super(EmbeddingActor, self).__init__(ctx, actor_id)
+        super(AgntActor, self).__init__(ctx, actor_id)
 
     async def _on_activate(self) -> None:
         logging.info(f"{self.__class__.__name__} ACTIVATED!")
@@ -62,6 +62,6 @@ def create_proxy(actor_type: str, actor_id: str, actor_interface: T) -> "ActorPr
     return proxy
 
 
-def create_embedding_actor_proxy(actor_id: str) -> EmbeddingActor:
-    return create_proxy(EmbeddingActor.__name__, actor_id, EmbeddingActorInterface)
+def create_agnt_actor_proxy(actor_id: str) -> AgntActor:
+    return create_proxy(AgntActor.__name__, actor_id, AgntActorInterface)
 

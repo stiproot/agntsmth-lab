@@ -6,8 +6,15 @@ from fastapi import FastAPI, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 
 from dapr.ext.fastapi import DaprApp
+from dapr.ext.fastapi import DaprActor
+from dapr.actor.runtime.config import (
+    ActorRuntimeConfig,
+    ActorTypeConfig,
+    ActorReentrancyConfig,
+)
+from dapr.actor.runtime.runtime import ActorRuntime
 
-from core import process_qry_cmd, build_graph
+from core import process_qry_cmd, process_build_agnt_cmd, AgntActor
 from endpoints import healthz
 
 
@@ -23,29 +30,33 @@ app.add_middleware(
 )
 app.include_router(healthz.router)
 
+actor_runtime_config = ActorRuntimeConfig()
+actor_runtime_config.update_actor_type_configs(
+    [
+        ActorTypeConfig(
+            actor_type=AgntActor.__name__,
+            reentrancy=ActorReentrancyConfig(enabled=True),
+        )
+    ]
+)
+ActorRuntime.set_actor_config(actor_runtime_config)
 
-WI_SYS_PROMPT = """
-    You are a helpful agent with expertise in translating work item data in a rough text form to a structured formalized yaml structure.
-
-    You should follow these guidelines:
-    - Understand the Requirements: use the context retriever tool to look up the necessary information about the repository. You can use the context retriever tool as many times as you need to gather the necessary information.
-    - Focus on Clarity and Accuracy: Ensure that the answer is clear, concise, and easy to understand, and accurate.
-    - Formulate a Response: Format a response that addresses the question and provides the necessary information.
-"""
+dapr_actor = DaprActor(app)
 
 
-GRAPHS = {}
+@app.on_event("startup")
+async def startup_event():
+    logging.info("Registering actors...")
+    await dapr_actor.register_actor(AgntActor)
 
 
-@app.post("/build")
-async def handle_build_cmd(cmd: Dict[str, Any]):
-    logging.info(f"{handle_build_cmd.__name__} START.")
+@app.post("/build-agnt")
+async def handle_build_agnt_cmd(cmd: Dict[str, Any]):
+    logging.info(f"{handle_build_agnt_cmd.__name__} START.")
 
-    graph = build_graph(cmd["file_system_path"], sys_prompt=WI_SYS_PROMPT)
+    await process_build_agnt_cmd(cmd)
 
-    GRAPHS[cmd["file_system_path"]] = graph
-
-    logging.info(f"{handle_build_cmd.__name__} END.")
+    logging.info(f"{handle_build_agnt_cmd.__name__} END.")
     return Response(status_code=status.HTTP_200_OK)
 
 
@@ -53,9 +64,7 @@ async def handle_build_cmd(cmd: Dict[str, Any]):
 async def handle_qry_cmd(cmd: Dict[str, Any]):
     logging.info(f"{handle_qry_cmd.__name__} START.")
 
-    graph = GRAPHS.get(cmd["file_system_path"], None)
-
-    output = await process_qry_cmd(cmd, graph)
+    output = await process_qry_cmd(cmd)
     resp = json_dumps({"output": output})
 
     logging.info(f"{handle_qry_cmd.__name__} END.")
