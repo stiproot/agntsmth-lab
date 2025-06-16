@@ -1,6 +1,6 @@
 from typing import Awaitable, Dict, Any, Optional
 from langchain_core.messages import HumanMessage
-from agnt_smth.core.utls import log
+from agntsmth_core.core.utls import log
 from .agent import build_context_graph
 from .actors import create_agnt_actor_proxy
 

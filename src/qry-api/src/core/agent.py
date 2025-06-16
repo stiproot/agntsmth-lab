@@ -8,9 +8,9 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langgraph.graph import START, END, StateGraph
 from langgraph.prebuilt.tool_executor import ToolExecutor
 
-from agnt_smth.core.utls import log, ModelFactory, ChromaHttpClientFactory, EmbeddingFactory, RetrieverFactory
-from agnt_smth.core.tools import RetrieveAdditionalContextTool
-from agnt_smth.core.workflows import build_agnt_with_tools_graph
+from agntsmth_core.core.utls import log, ModelFactory, ChromaHttpClientFactory, EmbeddingFactory, RetrieverFactory
+from agntsmth_core.core.tools import RetrieveAdditionalContextTool
+from agntsmth_core.core.workflows import build_agnt_with_tools_graph
 
 from .retrievers import RemoteEmbeddingRetriever
 

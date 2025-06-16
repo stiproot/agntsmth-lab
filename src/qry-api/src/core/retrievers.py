@@ -1,7 +1,7 @@
 import requests
 from langchain.schema import BaseRetriever, Document
 from pydantic import BaseModel
-from agnt_smth.core.utls import log
+from agntsmth_core.core.utls import log
 
 
 class RemoteEmbeddingRetriever(BaseRetriever, BaseModel):
